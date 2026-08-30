@@ -4,6 +4,7 @@ import LogSentinel.exception.LogNotFoundException;
 import LogSentinel.dto.CreateLogRequest;
 import LogSentinel.dto.LogResponse;
 import LogSentinel.entity.Log;
+import LogSentinel.entity.LogLevel;
 import LogSentinel.repository.LogRepository;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +43,33 @@ public class LogService {
     public List<LogResponse> getAllLogs() {
 
         return logRepository.findAll()
+                .stream()
+                .map(log -> new LogResponse(
+                        log.getId(),
+                        log.getLevel(),
+                        log.getMessage(),
+                        log.getSource(),
+                        log.getTimestamp()
+                ))
+                .toList();
+    }
+    public List<LogResponse> getLogsByLevel(LogLevel level) {
+
+        return logRepository.findByLevel(level)
+                .stream()
+                .map(log -> new LogResponse(
+                        log.getId(),
+                        log.getLevel(),
+                        log.getMessage(),
+                        log.getSource(),
+                        log.getTimestamp()
+                ))
+                .toList();
+    }
+
+    public List<LogResponse> getLogsBySource(String source) {
+
+        return logRepository.findBySource(source)
                 .stream()
                 .map(log -> new LogResponse(
                         log.getId(),

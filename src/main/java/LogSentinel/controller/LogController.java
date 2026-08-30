@@ -3,6 +3,7 @@ package LogSentinel.controller;
 import LogSentinel.dto.CreateLogRequest;
 import LogSentinel.dto.LogResponse;
 import LogSentinel.service.LogService;
+import LogSentinel.entity.LogLevel;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +29,15 @@ public class LogController {
     @GetMapping
     public List<LogResponse> getAllLogs() {
         return logService.getAllLogs();
+    }
+    @GetMapping("/filter/level/{level}")
+    public List<LogResponse> getLogsByLevel(@PathVariable LogLevel level) {
+        return logService.getLogsByLevel(level);
+    }
+
+    @GetMapping("/filter/source/{source}")
+    public List<LogResponse> getLogsBySource(@PathVariable String source) {
+        return logService.getLogsBySource(source);
     }
     @GetMapping("/{id}")
     public LogResponse getLogById(@PathVariable Long id) {
