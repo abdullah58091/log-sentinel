@@ -31,6 +31,7 @@ public class GlobalExceptionHandler {
                 "message", exception.getMessage()
         );
     }
+
     @ExceptionHandler(TicketNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleTicketNotFound(
@@ -38,6 +39,17 @@ public class GlobalExceptionHandler {
 
         return Map.of(
                 "error", "Ticket Not Found",
+                "message", exception.getMessage()
+        );
+    }
+
+    @ExceptionHandler(InvalidLogException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleInvalidLog(
+            InvalidLogException exception) {
+
+        return Map.of(
+                "error", "Invalid Log",
                 "message", exception.getMessage()
         );
     }

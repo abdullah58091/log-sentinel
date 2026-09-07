@@ -11,4 +11,9 @@ public interface LogRepository extends JpaRepository<Log, Long> {
     List<Log> findByLevel(LogLevel level);
 
     List<Log> findBySource(String source);
+    boolean existsByLevelAndMessageAndSource(
+            LogLevel level,
+            String message,
+            String source
+    );
 }
