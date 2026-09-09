@@ -53,4 +53,14 @@ public class GlobalExceptionHandler {
                 "message", exception.getMessage()
         );
     }
+    @ExceptionHandler(DuplicateLogException.class)
+    @ResponseStatus(HttpStatus.OK)
+    public Map<String, Object> handleDuplicateLog(
+            DuplicateLogException exception) {
+
+        return Map.of(
+                "duplicate", true,
+                "message", exception.getMessage()
+        );
+    }
 }
