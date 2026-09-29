@@ -1,5 +1,7 @@
 package LogSentinel.entity;
 
+import LogSentinel.enums.IncidentStatus;
+import LogSentinel.enums.Severity;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -20,22 +22,40 @@ public class Incident {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    private Severity severity;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private IncidentStatus status;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+    @OneToOne
+    @JoinColumn(name = "related_log_id", nullable = false)
+    private Log relatedLog;
 
     public Incident() {
     }
 
     public Incident(String title,
                     String description,
+                    Severity severity,
                     IncidentStatus status,
-                    LocalDateTime createdAt) {
+                    LocalDateTime createdAt,
+                    LocalDateTime updatedAt,
+                    Log relatedLog) {
+
         this.title = title;
         this.description = description;
+        this.severity = severity;
         this.status = status;
         this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.relatedLog = relatedLog;
     }
 
     public Long getId() {
@@ -58,6 +78,14 @@ public class Incident {
         this.description = description;
     }
 
+    public Severity getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(Severity severity) {
+        this.severity = severity;
+    }
+
     public IncidentStatus getStatus() {
         return status;
     }
@@ -72,5 +100,21 @@ public class Incident {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public Log getRelatedLog() {
+        return relatedLog;
+    }
+
+    public void setRelatedLog(Log relatedLog) {
+        this.relatedLog = relatedLog;
     }
 }

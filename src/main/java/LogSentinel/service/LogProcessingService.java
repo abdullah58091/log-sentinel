@@ -12,6 +12,7 @@ import LogSentinel.processor.LogLevelDetector;
 import LogSentinel.processor.MessageExtractor;
 import LogSentinel.processor.SourceDetector;
 import LogSentinel.processor.TimestampHandler;
+import LogSentinel.repository.LogRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -27,6 +28,8 @@ public class LogProcessingService {
     private final AbnormalEventDetector abnormalEventDetector;
     private final DuplicateLogDetector duplicateLogDetector;
     private final SeverityService severityService;
+    private final LogRepository logRepository;
+    private final IncidentService incidentService;
 
     public LogProcessingService(
             LogParser logParser,
@@ -36,7 +39,9 @@ public class LogProcessingService {
             TimestampHandler timestampHandler,
             AbnormalEventDetector abnormalEventDetector,
             DuplicateLogDetector duplicateLogDetector,
-            SeverityService severityService
+            SeverityService severityService,
+            LogRepository logRepository,
+            IncidentService incidentService
     ) {
         this.logParser = logParser;
         this.logLevelDetector = logLevelDetector;
@@ -46,6 +51,8 @@ public class LogProcessingService {
         this.abnormalEventDetector = abnormalEventDetector;
         this.duplicateLogDetector = duplicateLogDetector;
         this.severityService = severityService;
+        this.logRepository = logRepository;
+        this.incidentService = incidentService;
     }
 
     public ProcessedLogResponse process(String rawLog) {
@@ -76,6 +83,11 @@ public class LogProcessingService {
             LocalDateTime timestamp =
                     timestampHandler.extract(rawLog);
 
+            parsedLog.setLevel(level);
+            parsedLog.setMessage(message);
+            parsedLog.setSource(source);
+            parsedLog.setTimestamp(timestamp);
+
             boolean abnormal =
                     abnormalEventDetector.isAbnormal(level);
 
@@ -85,6 +97,17 @@ public class LogProcessingService {
                             message,
                             source
                     );
+
+            Log savedLog = logRepository.save(parsedLog);
+
+            if (severity == Severity.HIGH ||
+                    severity == Severity.CRITICAL) {
+
+                incidentService.createAutomaticIncident(
+                        savedLog,
+                        severity
+                );
+            }
 
             return new ProcessedLogResponse(
                     level,

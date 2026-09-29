@@ -12,6 +12,7 @@ import LogSentinel.processor.LogLevelDetector;
 import LogSentinel.processor.MessageExtractor;
 import LogSentinel.processor.SourceDetector;
 import LogSentinel.processor.TimestampHandler;
+import LogSentinel.repository.LogRepository;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -45,6 +46,12 @@ class LogProcessingServiceTest {
     private final SeverityService severityService =
             new SeverityService();
 
+    private final LogRepository logRepository =
+            mock(LogRepository.class);
+
+    private final IncidentService incidentService =
+            mock(IncidentService.class);
+
     private final LogProcessingService service =
             new LogProcessingService(
                     logParser,
@@ -54,7 +61,9 @@ class LogProcessingServiceTest {
                     timestampHandler,
                     abnormalEventDetector,
                     duplicateLogDetector,
-                    severityService
+                    severityService,
+                    logRepository,
+                    incidentService
             );
 
     @Test
@@ -97,6 +106,9 @@ class LogProcessingServiceTest {
                 "database-service"
         )).thenReturn(false);
 
+        when(logRepository.save(parsedLog))
+                .thenReturn(parsedLog);
+
         ProcessedLogResponse result =
                 service.process(rawLog);
 
@@ -133,6 +145,13 @@ class LogProcessingServiceTest {
 
         assertFalse(
                 result.isDuplicate()
+        );
+
+        verify(logRepository).save(parsedLog);
+
+        verify(incidentService).createAutomaticIncident(
+                parsedLog,
+                Severity.HIGH
         );
     }
 

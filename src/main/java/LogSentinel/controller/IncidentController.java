@@ -2,6 +2,7 @@ package LogSentinel.controller;
 
 import LogSentinel.dto.CreateIncidentRequest;
 import LogSentinel.dto.IncidentResponse;
+import LogSentinel.dto.UpdateIncidentRequest;
 import LogSentinel.service.IncidentService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -40,11 +41,12 @@ public class IncidentController {
         return incidentService.getIncidentById(id);
     }
 
-    @PutMapping("/{id}/resolve")
-    public IncidentResponse resolveIncident(
-            @PathVariable Long id) {
+    @PutMapping("/{id}")
+    public IncidentResponse updateIncident(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateIncidentRequest request) {
 
-        return incidentService.resolveIncident(id);
+        return incidentService.updateIncident(id, request);
     }
 
     @DeleteMapping("/{id}")

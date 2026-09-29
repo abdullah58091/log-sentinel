@@ -1,6 +1,8 @@
 package LogSentinel.dto;
 
+import LogSentinel.enums.Severity;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public class CreateIncidentRequest {
 
@@ -9,6 +11,12 @@ public class CreateIncidentRequest {
 
     @NotBlank(message = "Description is required")
     private String description;
+
+    @NotNull(message = "Severity is required")
+    private Severity severity;
+
+    @NotNull(message = "Related log ID is required")
+    private Long relatedLogId;
 
     public CreateIncidentRequest() {
     }
@@ -27,5 +35,21 @@ public class CreateIncidentRequest {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Severity getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(Severity severity) {
+        this.severity = severity;
+    }
+
+    public Long getRelatedLogId() {
+        return relatedLogId;
+    }
+
+    public void setRelatedLogId(Long relatedLogId) {
+        this.relatedLogId = relatedLogId;
     }
 }
