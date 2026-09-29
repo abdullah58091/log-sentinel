@@ -1,6 +1,7 @@
 package LogSentinel.dto;
 
 import LogSentinel.entity.LogLevel;
+import LogSentinel.enums.Severity;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -18,6 +19,7 @@ class ProcessedLogResponseTest {
         ProcessedLogResponse response =
                 new ProcessedLogResponse(
                         LogLevel.ERROR,
+                        Severity.HIGH,
                         "Database connection failed",
                         "database-service",
                         timestamp,
@@ -25,17 +27,37 @@ class ProcessedLogResponseTest {
                         false
                 );
 
-        assertEquals(LogLevel.ERROR, response.getLevel());
+        assertEquals(
+                LogLevel.ERROR,
+                response.getLevel()
+        );
+
+        assertEquals(
+                Severity.HIGH,
+                response.getSeverity()
+        );
+
         assertEquals(
                 "Database connection failed",
                 response.getMessage()
         );
+
         assertEquals(
                 "database-service",
                 response.getSource()
         );
-        assertEquals(timestamp, response.getTimestamp());
-        assertTrue(response.isAbnormal());
-        assertFalse(response.isDuplicate());
+
+        assertEquals(
+                timestamp,
+                response.getTimestamp()
+        );
+
+        assertTrue(
+                response.isAbnormal()
+        );
+
+        assertFalse(
+                response.isDuplicate()
+        );
     }
 }

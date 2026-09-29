@@ -3,6 +3,7 @@ package LogSentinel.service;
 import LogSentinel.dto.ProcessedLogResponse;
 import LogSentinel.entity.Log;
 import LogSentinel.entity.LogLevel;
+import LogSentinel.enums.Severity;
 import LogSentinel.exception.InvalidLogException;
 import LogSentinel.parser.LogParser;
 import LogSentinel.processor.AbnormalEventDetector;
@@ -25,6 +26,7 @@ public class LogProcessingService {
     private final TimestampHandler timestampHandler;
     private final AbnormalEventDetector abnormalEventDetector;
     private final DuplicateLogDetector duplicateLogDetector;
+    private final SeverityService severityService;
 
     public LogProcessingService(
             LogParser logParser,
@@ -33,7 +35,8 @@ public class LogProcessingService {
             SourceDetector sourceDetector,
             TimestampHandler timestampHandler,
             AbnormalEventDetector abnormalEventDetector,
-            DuplicateLogDetector duplicateLogDetector
+            DuplicateLogDetector duplicateLogDetector,
+            SeverityService severityService
     ) {
         this.logParser = logParser;
         this.logLevelDetector = logLevelDetector;
@@ -42,6 +45,7 @@ public class LogProcessingService {
         this.timestampHandler = timestampHandler;
         this.abnormalEventDetector = abnormalEventDetector;
         this.duplicateLogDetector = duplicateLogDetector;
+        this.severityService = severityService;
     }
 
     public ProcessedLogResponse process(String rawLog) {
@@ -54,13 +58,23 @@ public class LogProcessingService {
 
             Log parsedLog = logParser.parse(rawLog);
 
-            LogLevel level = logLevelDetector.detect(rawLog);
+            LogLevel level =
+                    logLevelDetector.detect(rawLog);
 
-            String message = messageExtractor.extract(rawLog);
+            String message =
+                    messageExtractor.extract(rawLog);
 
-            String source = sourceDetector.detect(rawLog);
+            Severity severity =
+                    severityService.determineSeverity(
+                            level,
+                            message
+                    );
 
-            LocalDateTime timestamp = timestampHandler.extract(rawLog);
+            String source =
+                    sourceDetector.detect(rawLog);
+
+            LocalDateTime timestamp =
+                    timestampHandler.extract(rawLog);
 
             boolean abnormal =
                     abnormalEventDetector.isAbnormal(level);
@@ -74,6 +88,7 @@ public class LogProcessingService {
 
             return new ProcessedLogResponse(
                     level,
+                    severity,
                     message,
                     source,
                     timestamp,

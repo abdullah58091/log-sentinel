@@ -3,6 +3,7 @@ package LogSentinel.service;
 import LogSentinel.dto.ProcessedLogResponse;
 import LogSentinel.entity.Log;
 import LogSentinel.entity.LogLevel;
+import LogSentinel.enums.Severity;
 import LogSentinel.exception.InvalidLogException;
 import LogSentinel.parser.LogParser;
 import LogSentinel.processor.AbnormalEventDetector;
@@ -20,7 +21,8 @@ import static org.mockito.Mockito.*;
 
 class LogProcessingServiceTest {
 
-    private final LogParser logParser = mock(LogParser.class);
+    private final LogParser logParser =
+            mock(LogParser.class);
 
     private final LogLevelDetector logLevelDetector =
             mock(LogLevelDetector.class);
@@ -40,6 +42,9 @@ class LogProcessingServiceTest {
     private final DuplicateLogDetector duplicateLogDetector =
             mock(DuplicateLogDetector.class);
 
+    private final SeverityService severityService =
+            new SeverityService();
+
     private final LogProcessingService service =
             new LogProcessingService(
                     logParser,
@@ -48,7 +53,8 @@ class LogProcessingServiceTest {
                     sourceDetector,
                     timestampHandler,
                     abnormalEventDetector,
-                    duplicateLogDetector
+                    duplicateLogDetector,
+                    severityService
             );
 
     @Test
@@ -99,6 +105,11 @@ class LogProcessingServiceTest {
         assertEquals(
                 LogLevel.ERROR,
                 result.getLevel()
+        );
+
+        assertEquals(
+                Severity.HIGH,
+                result.getSeverity()
         );
 
         assertEquals(

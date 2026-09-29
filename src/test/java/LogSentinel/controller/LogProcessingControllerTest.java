@@ -3,6 +3,7 @@ package LogSentinel.controller;
 import LogSentinel.dto.ProcessedLogResponse;
 import LogSentinel.dto.RawLogRequest;
 import LogSentinel.entity.LogLevel;
+import LogSentinel.enums.Severity;
 import LogSentinel.service.LogProcessingService;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +36,7 @@ class LogProcessingControllerTest {
         ProcessedLogResponse processedResponse =
                 new ProcessedLogResponse(
                         LogLevel.ERROR,
+                        Severity.HIGH,
                         "Database connection failed",
                         "database-service",
                         timestamp,
@@ -48,13 +50,23 @@ class LogProcessingControllerTest {
         ResponseEntity<ProcessedLogResponse> response =
                 controller.processLog(request);
 
-        assertEquals(200, response.getStatusCode().value());
+        assertEquals(
+                200,
+                response.getStatusCode().value()
+        );
 
-        assertNotNull(response.getBody());
+        assertNotNull(
+                response.getBody()
+        );
 
         assertEquals(
                 LogLevel.ERROR,
                 response.getBody().getLevel()
+        );
+
+        assertEquals(
+                Severity.HIGH,
+                response.getBody().getSeverity()
         );
 
         assertEquals(

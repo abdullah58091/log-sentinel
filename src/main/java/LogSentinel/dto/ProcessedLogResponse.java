@@ -1,12 +1,14 @@
 package LogSentinel.dto;
 
 import LogSentinel.entity.LogLevel;
+import LogSentinel.enums.Severity;
 
 import java.time.LocalDateTime;
 
 public class ProcessedLogResponse {
 
     private LogLevel level;
+    private Severity severity;
     private String message;
     private String source;
     private LocalDateTime timestamp;
@@ -18,6 +20,7 @@ public class ProcessedLogResponse {
 
     public ProcessedLogResponse(
             LogLevel level,
+            Severity severity,
             String message,
             String source,
             LocalDateTime timestamp,
@@ -25,6 +28,7 @@ public class ProcessedLogResponse {
             boolean duplicate
     ) {
         this.level = level;
+        this.severity = severity;
         this.message = message;
         this.source = source;
         this.timestamp = timestamp;
@@ -34,6 +38,10 @@ public class ProcessedLogResponse {
 
     public LogLevel getLevel() {
         return level;
+    }
+
+    public Severity getSeverity() {
+        return severity;
     }
 
     public String getMessage() {
