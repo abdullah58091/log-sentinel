@@ -28,7 +28,7 @@ public class AuthController {
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setPassword(request.getPassword());
-        user.setRole("USER");
+        user.setRole("DEVELOPER");
 
         User savedUser = userService.registerUser(user);
 
