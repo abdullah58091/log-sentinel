@@ -16,4 +16,5 @@ public interface LogRepository extends JpaRepository<Log, Long> {
             String message,
             String source
     );
+    long countByLevel(LogLevel level);
 }
