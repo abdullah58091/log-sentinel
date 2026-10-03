@@ -5,8 +5,10 @@ import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import Logs from './pages/Logs'
 import Incidents from './pages/Incidents'
+import IncidentDetails from './pages/IncidentDetails'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
+import Profile from './pages/Profile'
 
 function App() {
     return (
@@ -26,6 +28,11 @@ function App() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/logs" element={<Logs />} />
                 <Route path="/incidents" element={<Incidents />} />
+                <Route
+                    path="/incidents/:id"
+                    element={<IncidentDetails />}
+                />
+                <Route path="/profile" element={<Profile />} />
             </Route>
 
             {/* Unknown URL */}
