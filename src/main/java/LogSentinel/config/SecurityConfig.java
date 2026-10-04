@@ -74,6 +74,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/ai/**").permitAll()
                         .requestMatchers("/api/log-processing")
                         .hasAnyRole("ADMIN", "DEVELOPER")
                         .requestMatchers("/api/incidents/**")
