@@ -4,11 +4,14 @@ import LogSentinel.dto.CreateLogRequest;
 import LogSentinel.dto.LogResponse;
 import LogSentinel.entity.Log;
 import LogSentinel.entity.LogLevel;
+import LogSentinel.exception.DuplicateLogException;
 import LogSentinel.exception.LogNotFoundException;
 import LogSentinel.processor.DuplicateLogDetector;
 import LogSentinel.repository.LogRepository;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import LogSentinel.exception.DuplicateLogException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,7 +33,6 @@ public class LogService {
     // CREATE LOG
     public LogResponse createLog(CreateLogRequest request) {
 
-        // Check duplicate before saving
         boolean duplicate = duplicateLogDetector.isDuplicate(
                 request.getLevel(),
                 request.getMessage(),
@@ -59,19 +61,82 @@ public class LogService {
         );
     }
 
-    // GET ALL LOGS
-    public List<LogResponse> getAllLogs() {
+    // GET ALL LOGS WITH PAGINATION
+    public Page<LogResponse> getAllLogs(Pageable pageable) {
 
-        return logRepository.findAll()
-                .stream()
-                .map(log -> new LogResponse(
-                        log.getId(),
-                        log.getLevel(),
-                        log.getMessage(),
-                        log.getSource(),
-                        log.getTimestamp()
-                ))
-                .toList();
+        return logRepository.findAll(pageable)
+                .map(this::toResponse);
+    }
+
+    // SEARCH LOGS
+    public Page<LogResponse> searchLogs(
+            String search,
+            Pageable pageable
+    ) {
+
+        return logRepository
+                .findByMessageContainingIgnoreCaseOrSourceContainingIgnoreCase(
+                        search,
+                        search,
+                        pageable
+                )
+                .map(this::toResponse);
+    }
+
+    // GET LOGS BY LEVEL WITH PAGINATION
+    public Page<LogResponse> getLogsByLevel(
+            LogLevel level,
+            Pageable pageable
+    ) {
+
+        return logRepository.findByLevel(level, pageable)
+                .map(this::toResponse);
+    }
+
+    // GET LOGS BY SOURCE WITH PAGINATION
+    public Page<LogResponse> getLogsBySource(
+            String source,
+            Pageable pageable
+    ) {
+
+        return logRepository.findBySource(source, pageable)
+                .map(this::toResponse);
+    }
+
+    // GET LOGS BY DATE RANGE WITH PAGINATION
+    public Page<LogResponse> getLogsByDateRange(
+            LocalDateTime from,
+            LocalDateTime to,
+            Pageable pageable
+    ) {
+
+        return logRepository.findByTimestampBetween(
+                        from,
+                        to,
+                        pageable
+                )
+                .map(this::toResponse);
+    }
+
+    // COMBINED SEARCH + FILTERS + PAGINATION
+    public Page<LogResponse> searchLogsWithFilters(
+            String search,
+            LogLevel level,
+            String source,
+            LocalDateTime from,
+            LocalDateTime to,
+            Pageable pageable
+    ) {
+
+        return logRepository.searchLogsWithFilters(
+                        search,
+                        level,
+                        source,
+                        from,
+                        to,
+                        pageable
+                )
+                .map(this::toResponse);
     }
 
     // GET LOGS BY LEVEL
@@ -79,13 +144,7 @@ public class LogService {
 
         return logRepository.findByLevel(level)
                 .stream()
-                .map(log -> new LogResponse(
-                        log.getId(),
-                        log.getLevel(),
-                        log.getMessage(),
-                        log.getSource(),
-                        log.getTimestamp()
-                ))
+                .map(this::toResponse)
                 .toList();
     }
 
@@ -94,13 +153,7 @@ public class LogService {
 
         return logRepository.findBySource(source)
                 .stream()
-                .map(log -> new LogResponse(
-                        log.getId(),
-                        log.getLevel(),
-                        log.getMessage(),
-                        log.getSource(),
-                        log.getTimestamp()
-                ))
+                .map(this::toResponse)
                 .toList();
     }
 
@@ -114,13 +167,7 @@ public class LogService {
                         )
                 );
 
-        return new LogResponse(
-                log.getId(),
-                log.getLevel(),
-                log.getMessage(),
-                log.getSource(),
-                log.getTimestamp()
-        );
+        return toResponse(log);
     }
 
     // DELETE LOG
@@ -133,5 +180,17 @@ public class LogService {
         }
 
         logRepository.deleteById(id);
+    }
+
+    // ENTITY -> RESPONSE
+    private LogResponse toResponse(Log log) {
+
+        return new LogResponse(
+                log.getId(),
+                log.getLevel(),
+                log.getMessage(),
+                log.getSource(),
+                log.getTimestamp()
+        );
     }
 }
