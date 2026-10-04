@@ -20,13 +20,16 @@ public class IncidentService {
 
     private final IncidentRepository incidentRepository;
     private final LogRepository logRepository;
+    private final NotificationService notificationService;
 
     public IncidentService(
             IncidentRepository incidentRepository,
-            LogRepository logRepository) {
+            LogRepository logRepository,
+            NotificationService notificationService) {
 
         this.incidentRepository = incidentRepository;
         this.logRepository = logRepository;
+        this.notificationService = notificationService;
     }
 
     public IncidentResponse createIncident(
@@ -55,6 +58,9 @@ public class IncidentService {
 
         Incident savedIncident =
                 incidentRepository.save(incident);
+
+        // Create notification after incident is successfully saved
+        notificationService.createIncidentNotification(savedIncident);
 
         return mapToResponse(savedIncident);
     }
@@ -85,6 +91,9 @@ public class IncidentService {
 
         Incident savedIncident =
                 incidentRepository.save(incident);
+
+        // Create notification after automatic incident is saved
+        notificationService.createIncidentNotification(savedIncident);
 
         return mapToResponse(savedIncident);
     }

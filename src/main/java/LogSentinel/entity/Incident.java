@@ -34,20 +34,25 @@ public class Incident {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToOne
-    @JoinColumn(name = "related_log_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+            name = "related_log_id",
+            nullable = false,
+            unique = true
+    )
     private Log relatedLog;
 
     public Incident() {
     }
 
-    public Incident(String title,
-                    String description,
-                    Severity severity,
-                    IncidentStatus status,
-                    LocalDateTime createdAt,
-                    LocalDateTime updatedAt,
-                    Log relatedLog) {
+    public Incident(
+            String title,
+            String description,
+            Severity severity,
+            IncidentStatus status,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt,
+            Log relatedLog) {
 
         this.title = title;
         this.description = description;
