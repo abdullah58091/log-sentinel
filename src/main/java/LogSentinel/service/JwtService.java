@@ -1,4 +1,4 @@
-package LogSentinel.service;
+ package LogSentinel.service;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -14,9 +14,11 @@ public class JwtService {
 
     private final SecretKey key;
 
-    private static final long EXPIRATION_TIME = 1000 * 60 * 60;
+    private static final long EXPIRATION_TIME =
+            1000 * 60 * 60;
 
-    public JwtService(@Value("${jwt.secret}") String secretKey) {
+    public JwtService(
+            @Value("${jwt.secret}") String secretKey) {
 
         this.key = Keys.hmacShaKeyFor(
                 secretKey.getBytes(StandardCharsets.UTF_8)
@@ -29,7 +31,10 @@ public class JwtService {
                 .subject(username)
                 .issuedAt(new Date())
                 .expiration(
-                        new Date(System.currentTimeMillis() + EXPIRATION_TIME)
+                        new Date(
+                                System.currentTimeMillis()
+                                        + EXPIRATION_TIME
+                        )
                 )
                 .signWith(key)
                 .compact();
@@ -45,15 +50,48 @@ public class JwtService {
                 .getSubject();
     }
 
-    public boolean isTokenValid(String token, String username) {
+    public boolean isTokenValid(
+            String token,
+            String username) {
 
         try {
-            String extractedUsername = extractUsername(token);
+
+            String extractedUsername =
+                    extractUsername(token);
 
             return extractedUsername.equals(username);
 
         } catch (Exception e) {
+
             return false;
+        }
+    }
+
+    public long getRemainingExpirationSeconds(
+            String token) {
+
+        try {
+
+            Date expiration =
+                    Jwts.parser()
+                            .verifyWith(key)
+                            .build()
+                            .parseSignedClaims(token)
+                            .getPayload()
+                            .getExpiration();
+
+            long remainingMillis =
+                    expiration.getTime()
+                            - System.currentTimeMillis();
+
+            return Math.max(
+                    1,
+                    remainingMillis / 1000
+            );
+
+        } catch (Exception e) {
+
+            return 1;
         }
     }
 }
