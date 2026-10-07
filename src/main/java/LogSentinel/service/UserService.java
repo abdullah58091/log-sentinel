@@ -14,9 +14,11 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    public UserService(UserRepository userRepository,
-                       PasswordEncoder passwordEncoder,
-                       JwtService jwtService) {
+    public UserService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            JwtService jwtService) {
+
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
@@ -32,7 +34,9 @@ public class UserService {
             throw new RuntimeException("Email already exists");
         }
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(
+                passwordEncoder.encode(user.getPassword())
+        );
 
         return userRepository.save(user);
     }
@@ -52,10 +56,14 @@ public class UserService {
 
         return jwtService.generateToken(user.getUsername());
     }
+
     public User getUserByUsername(String username) {
 
         return userRepository.findByUsername(username)
                 .orElseThrow(() ->
-                        new RuntimeException("User not found"));
+                        new RuntimeException(
+                                "User not found"
+                        )
+                );
     }
 }
