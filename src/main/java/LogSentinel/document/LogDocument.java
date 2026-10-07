@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 public class LogDocument {
 
     @Id
-    private Long id;
+    private String id;
 
     private String level;
     private String severity;
@@ -23,7 +23,7 @@ public class LogDocument {
     }
 
     public LogDocument(
-            Long id,
+            String id,
             String level,
             String severity,
             String message,
@@ -42,11 +42,11 @@ public class LogDocument {
         this.duplicate = duplicate;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
