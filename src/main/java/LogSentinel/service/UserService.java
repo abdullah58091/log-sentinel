@@ -13,15 +13,18 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final AuditLogService auditLogService;
 
     public UserService(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
-            JwtService jwtService) {
+            JwtService jwtService,
+            AuditLogService auditLogService) {
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.auditLogService = auditLogService;
     }
 
     public User registerUser(User user) {
@@ -45,14 +48,24 @@ public class UserService {
 
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() ->
-                        new BadCredentialsException("Invalid username or password"));
+                        new BadCredentialsException(
+                                "Invalid username or password"
+                        ));
 
         if (!passwordEncoder.matches(
                 request.getPassword(),
                 user.getPassword())) {
 
-            throw new BadCredentialsException("Invalid username or password");
+            throw new BadCredentialsException(
+                    "Invalid username or password"
+            );
         }
+
+        auditLogService.recordAction(
+                user,
+                "LOGIN",
+                "User logged into the system"
+        );
 
         return jwtService.generateToken(user.getUsername());
     }
