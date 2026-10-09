@@ -45,44 +45,67 @@ public class SecurityConfig {
                 List.of("*")
         );
 
-        CorsConfigurationSource source =
+        UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
 
-        ((UrlBasedCorsConfigurationSource) source)
-                .registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/**", configuration);
 
         return source;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http
+    ) throws Exception {
 
         http
+                // Disable CSRF because this application uses JWT
                 .csrf(csrf -> csrf.disable())
 
+                // Enable CORS configuration
                 .cors(cors -> {})
 
+                // Disable form-based login
                 .formLogin(form -> form.disable())
 
+                // Disable HTTP Basic authentication
                 .httpBasic(basic -> basic.disable())
 
+                // Use stateless JWT authentication
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS
                         )
                 )
 
+                // Authorization rules
                 .authorizeHttpRequests(auth -> auth
+
+                        // Public authentication endpoints
                         .requestMatchers("/api/auth/**").permitAll()
+
+                        // AI chatbot endpoints
                         .requestMatchers("/api/ai/**").permitAll()
+
+                        // Spring Boot Actuator endpoints
+                        .requestMatchers("/actuator/**").permitAll()
+
+                        // Log processing requires ADMIN or DEVELOPER
                         .requestMatchers("/api/log-processing")
                         .hasAnyRole("ADMIN", "DEVELOPER")
+
+                        // Incident management requires ADMIN
                         .requestMatchers("/api/incidents/**")
                         .hasRole("ADMIN")
+
+                        // Error endpoint
                         .requestMatchers("/error").permitAll()
+
+                        // Everything else requires authentication
                         .anyRequest().authenticated()
                 )
 
+                // JWT authentication filter
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class

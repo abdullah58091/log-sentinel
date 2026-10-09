@@ -4,57 +4,78 @@ services:
     image: mysql:8.0
     container_name: log-sentinel-mysql
     restart: unless-stopped
+
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: log_sentinel
+
     ports:
-      - "3306:3306"
+      - "3307:3306"
+
     volumes:
       - mysql_data:/var/lib/mysql
+
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 10
 
+
   redis:
     image: redis:7
     container_name: log-sentinel-redis
     restart: unless-stopped
+
     ports:
       - "6379:6379"
+
     volumes:
       - redis_data:/data
+
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:9.4.5
     container_name: log-sentinel-elasticsearch
     restart: unless-stopped
+
     environment:
       discovery.type: single-node
       xpack.security.enabled: "false"
       ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+
     ports:
       - "9200:9200"
+
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
+
     healthcheck:
       test: ["CMD-SHELL", "curl -fs http://localhost:9200/_cluster/health || exit 1"]
       interval: 20s
       timeout: 10s
       retries: 10
 
+
   backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
     image: log-sentinel-backend:latest
     container_name: log-sentinel-backend
     restart: unless-stopped
+
     depends_on:
       mysql:
         condition: service_healthy
+
       elasticsearch:
         condition: service_healthy
+
       redis:
         condition: service_started
+
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/log_sentinel
       SPRING_DATASOURCE_USERNAME: root
@@ -67,17 +88,28 @@ services:
 
       JWT_SECRET: ${JWT_SECRET}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
+
+      SPRING_PROFILES_ACTIVE: prod
+
     ports:
       - "8080:8080"
 
+
   frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+
     image: log-sentinel-frontend:latest
     container_name: log-sentinel-frontend
     restart: unless-stopped
+
     depends_on:
       - backend
+
     ports:
       - "5173:80"
+
 
 volumes:
   mysql_data:
